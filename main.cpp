@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <stdlib.h>
+#include <time.h>
 
 using namespace std;
 
@@ -43,11 +45,15 @@ namespace
     const char KTokenPlayer1 = 'X';
     const char KTokenPlayer2 = 'O';
     const char KEmpty        = ' ';
+    const char KTiret        = '-';
+    const char KPipe         = '|';
+    const char KForbidden    = 'G';
+
 
 
     void  ShowMatrix (const CMatrix & Mat)
     {
-        const string KTiretsLine = string(4*(Mat[0].size()), '-');
+        const string KTiretsLine = string(4*(Mat[0].size()), KTiret);
         ClearScreen();
         Couleur (KReset);
         cout << KTiretsLine << endl;
@@ -55,11 +61,19 @@ namespace
         {
             for( unsigned Col(0); Col < Mat[Line].size(); ++Col)
             {
-                if(Mat[Line][Col] != KTokenPlayer1 && Mat[Line][Col] != KTokenPlayer2)
-                    cout << '|' << KEmpty << Mat[Line][Col] << KEmpty;
+                if(Mat[Line][Col] != KTokenPlayer1 && Mat[Line][Col] != KTokenPlayer2 && Mat[Line][Col] != KForbidden)
+                    cout << KPipe << KEmpty << Mat[Line][Col] << KEmpty;
+                else if (Mat[Line][Col] == KForbidden)
+                {
+                    cout << KPipe;
+                    Couleur(KNoir);
+                    Couleur(KFNoir);
+                    cout << KEmpty << Mat[Line][Col] << KEmpty;
+                    Couleur(KReset);
+                }
                 else
                 {
-                    cout << '|';
+                    cout << KPipe;
                     Couleur(Mat[Line][Col] == KTokenPlayer1 ? KRouge : KBleu);
                     cout << KEmpty << Mat[Line][Col] << KEmpty;
                     Couleur(KReset);
@@ -68,11 +82,11 @@ namespace
 
 
             }
-            cout << '|'<< endl << KTiretsLine << endl;
+            cout << KPipe << endl << KTiretsLine << endl;
         }
     } // ShowMatrix
 
-    void InitMat (CMatrix & Mat, unsigned NbLine, unsigned NbColumn, CPosition & PosPlayer1, CPosition & PosPlayer2)
+    void InitMat (CMatrix & Mat, const unsigned NbLine, const unsigned NbColumn, const CPosition & PosPlayer1, const CPosition & PosPlayer2)
     {
         Mat.resize(NbLine);
         for( unsigned Line(0); Line < Mat.size(); ++Line )
@@ -80,14 +94,14 @@ namespace
             Mat[Line].resize(NbColumn);
             for( unsigned Col(0); Col < Mat[Line].size(); ++Col)
             {
-                Mat[Line][Col] = ' ';
+                Mat[Line][Col] = KEmpty;
             }
         }
         Mat[PosPlayer1.first][PosPlayer1.second] = KTokenPlayer1;
         Mat[PosPlayer2.first][PosPlayer2.second] = KTokenPlayer2;
     } //InitMat
 
-    void MoveToken (CMatrix & Mat, char Move, CPosition  & Pos)
+    bool MoveToken (CMatrix & Mat, const char Move, CPosition  & Pos)
     {
         char Player = Mat[Pos.first][Pos.second];
         Mat[Pos.first][Pos.second] = KEmpty;
@@ -120,8 +134,57 @@ namespace
             default:
                 break;
         }
+        if(Mat[Pos.first][Pos.second] == KForbidden)
+            return false;
         Mat[Pos.first][Pos.second] = Player == KTokenPlayer1 ? KTokenPlayer1 : KTokenPlayer2;
+        return true;
     } //MoveToken
+
+    void DisableCase(CMatrix & Mat, const CPosition & Pos1, const CPosition & Pos2)
+    {
+        CPosition ForbiddenCase;
+        do
+        {
+            srand (time(NULL));
+            ForbiddenCase = make_pair(rand() % (Mat.size()-1), rand() % (Mat[0].size()-1));
+        } while(ForbiddenCase == Pos1 || ForbiddenCase == Pos2 || Mat[ForbiddenCase.first][ForbiddenCase.second] == KForbidden);
+
+        Mat[ForbiddenCase.first][ForbiddenCase.second] = KForbidden;
+
+
+    } //DisableCase
+
+    bool WinTest(const bool & Move,const CPosition & Pos1,const CPosition & Pos2, const unsigned & NbTurn)
+    {
+        if(!Move)
+        {
+            cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " est entré sur une case interdite." << endl;
+            cout << "Le joueur "<< (NbTurn%2 == 0 ? 1 : 2) << " a gagné !" << endl;
+            return true;
+        }
+        else if(Pos1 == Pos2)
+        {
+            cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " a mangé le joueur "  << (NbTurn%2 == 0 ? 2 : 1)  << endl;
+            cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " a gagné !" << endl;
+            return true;
+        }
+
+        return false;
+
+    } //WinTest
+
+    void CptTurn(unsigned & Turn)
+    {
+        ++Turn;
+        cout << "Tour : " << Turn << endl;
+    } //CptTurn
+
+    void Invite( const unsigned & Turn, char & MoveKey)
+    {
+        cout << "Joueur " << (Turn%2 == 0 ? 2 : 1) << " : Entrez une touche :" << endl;
+        cin >> MoveKey;
+    } //Invite
+
 
     int ppal ()
     {
@@ -129,33 +192,33 @@ namespace
         CMatrix Mat;
         CPosition Pos1 (0,9);
         CPosition Pos2 (9,0);
-        unsigned NbTurn(10);
+        unsigned NbTurn(0);
         char MoveKey;
+        bool Moved;
+        bool GameOver(false);
+
         InitMat(Mat, 10, 10, Pos1, Pos2);
-        ShowMatrix(Mat);
-        while(NbTurn != 0)
+
+        while(!(GameOver))
         {
-            cout << "Joueur " << (NbTurn%2 == 0 ? 1 : 2) << " : Entrez une touche :" << endl;
-            cin >> MoveKey;
-            MoveToken(Mat, MoveKey, NbTurn%2 == 0 ? Pos1 : Pos2);
             ShowMatrix(Mat);
-            if(Pos1 == Pos2)
-            {
-                cout << "Le joueur "<< (NbTurn%2 == 0 ? 1 : 2) << " a gagne !" << endl;
-                break;
-            }
-            --NbTurn;
-            cout << "Il reste " << NbTurn << " tours"<< endl;
+            CptTurn(NbTurn);
+            Invite(NbTurn, MoveKey);
+            Moved = MoveToken(Mat, MoveKey, NbTurn%2 == 0 ? Pos2 : Pos1);
+            ShowMatrix(Mat);
+            GameOver = WinTest(Moved, Pos1, Pos2, NbTurn);
+            DisableCase(Mat, Pos1, Pos2);
+
+
         }
-        cout << " Partie terminee" << endl;
+        cout << "Partie terminee" << endl;
         return 0;
     } //ppal
 
 }
 
-int main(int argc, char *argv[])
+int main()
 {
     ppal();
     return 0;
 }
-
