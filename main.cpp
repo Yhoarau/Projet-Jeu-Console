@@ -55,6 +55,31 @@ namespace
 
     const vector< pair<int,int>> PossibleMove = {{-1,-1},{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1}};
 
+    unsigned Difficulty()
+    {
+        unsigned Choix;
+        cout << "---------------MENU-----------------" << "\n\n\n";
+        cout << "1 - Facile" << endl;
+        cout << "2 - Moyen" << endl;
+        cout << "3 - Difficile" << "\n\n\n";
+        cout << "Votre choix : ";
+        cin >> Choix;
+        switch(Choix)
+        {
+            case 1:
+                return 1;
+                break;
+            case 2:
+                return 2;
+                break;
+            case 3:
+                return 3;
+                break;
+            default:
+                break;
+        }
+        return 0;
+    }
 
 
     void  ShowMatrix (const CMatrix & Mat)
@@ -177,7 +202,7 @@ namespace
 
         switch(Diff)
             {
-                case 0 : // Cas IA facile
+                case 1 : // Cas IA facile
                 {
 
                     if((Turn+2)%4 > 1 ) // Condition pour faire jouer les IA un tour sur deux
@@ -199,7 +224,7 @@ namespace
                     else return;
                     break;
                 }
-                case 1 : // Cas IA moyen ( déplacement interdit en diagonale )
+                case 2 : // Cas IA moyen ( déplacement interdit en diagonale )
                 {
                     do
                     {
@@ -215,7 +240,7 @@ namespace
                            || PosTemp.first > Mat.size() || PosTemp.second > Mat[0].size());
                     break;
                 }
-                case 2 : // Cas IA difficile ( Tout déplacement autorisé )
+                case 3 : // Cas IA difficile ( Tout déplacement autorisé )
                 {
                     do
                     {
@@ -269,35 +294,36 @@ namespace
 
 
     bool WinTest(const bool & Move,const CPosition & Pos1,const CPosition & Pos2, const CPosition & PosI,const CPosition & PosA, const unsigned & NbTurn)
-    {
-        if(!Move)
         {
-            cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " est entré sur une case interdite ou est sorti des limites du terrain." << endl;
-            cout << "Le joueur "<< (NbTurn%2 == 0 ? 1 : 2) << " a gagné !" << endl;
-            return true;
-        }
-        else if(Pos1 == Pos2)
-        {
-            cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " a mangé le joueur "  << (NbTurn%2 == 0 ? 1 : 2)  << endl;
-            cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " a gagné !" << endl;
-            return true;
-        }
-        else if(Pos1 == PosA || Pos2 == PosA || Pos1 == PosI || Pos2 == PosI )
-        {
-            cout << " Le joueur " << (NbTurn%2==0 ? (PosA == Pos1 ? 1 : 2) : (PosI == Pos1 ? 1 : 2)) << " s'est fait mangé par l'IA " << (NbTurn%2==0 ? 'A' : 'I') << endl;
-            cout << "Le joueur "<< (NbTurn%2==0 ? (PosA == Pos1 ? 2 : 1) : (PosI == Pos1 ? 2 : 1)) << " a gagné !" << endl;
-            return true;
-        }
-        else if ((Pos1.first  == MatSizeH -1 && Pos1.second == 0) || (Pos2.first == 0 && Pos2.second == MatSizeL -1))
-        {
-            cout << "Le joueur " << (NbTurn%2==0 ? 2 : 1) << " est entré dans le camp de l'adversaire." << endl;
-            cout << "Le joueur " << (NbTurn%2==0 ? 2 : 1) << " a gagné !" << endl;
-            return true;
-        }
+            if(!Move)
+            {
+                cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " est entré sur une case interdite. Il devrait regarder l'écran." << endl;
+                cout << "Le joueur "<< (NbTurn%2 == 0 ? 1 : 2) << " dispose de la vue" << endl;
+                return true;
+            }
+            else if(Pos1 == Pos2)
+            {
+                cout << "Le joueur "<< (NbTurn%2 == 0 ? 2 : 1) << " a mangé le joueur "  << (NbTurn%2 == 0 ? 1 : 2) << endl;
+                cout << "Le joueur "<< (NbTurn%2 == 0 ? 1 : 2) << " retarde sa mort !" << endl;
+                return true;
+            }
+            else if(Pos1 == PosA || Pos2 == PosA || Pos1 == PosI || Pos2 == PosI )
+            {
+                cout << " Le joueur " << (NbTurn%2==0 ? (PosA == Pos1 ? 1 : 2) : (PosI == Pos1 ? 1 : 2)) << " s'est fait mangé par l'IA " << (NbTurn%2==0 ? 'A' : 'I') << endl;
+                cout << "Le joueur "<< (NbTurn%2==0 ? (PosA == Pos1 ? 2 : 1) : (PosI == Pos1 ? 2 : 1)) << " était moins appétissant!" << endl;
+                return true;
+            }
 
-        return false;
+            else if ((Pos1.first  == MatSizeH -1 && Pos1.second == 0) || (Pos2.first == 0 && Pos2.second == MatSizeL -1))
+            {
+                cout << "Le joueur " << (NbTurn%2==0 ? 2 : 1) << " est entré dans le camp de l'adversaire." << endl;
+                cout << "Le joueur " << (NbTurn%2==0 ? 2 : 1) << " découvre un nouveau monde fantastique !" << endl;
+                return true;
+            }
 
-    } //WinTest
+            return false;
+
+        } //WinTest
 
     void CptTurn(unsigned & Turn)
     {
@@ -312,7 +338,7 @@ namespace
 
 
 
-    int ppal ()
+    int MangeMoi ()
     {
 
         CMatrix Mat;
@@ -321,7 +347,7 @@ namespace
         CPosition PosI (0,0);
         CPosition PosA (MatSizeH -1,MatSizeL -1);
         unsigned NbTurn(0);
-        unsigned Diff(1);
+        unsigned Diff(Difficulty());
         char MoveKey;
         bool Moved;
         bool GameOver(false);
@@ -349,12 +375,40 @@ namespace
         }
         cout << "Partie terminee" << endl;
         return 0;
-    } //ppal
+    }
 
+    void Menu()
+    {
+        unsigned Choix;
+        cout << "---------------MENU-----------------" << "\n\n\n";
+        cout << "1 - Mode \" Mange moi ! \"" << endl;
+        cout << "2 - Mode Labyrinthe" << endl;
+        cout << "3 - Mode Pièges" << "\n\n\n";
+        cout << "Votre choix : ";
+        cin >> Choix;
+        switch(Choix)
+        {
+            case 1:
+                ClearScreen ();
+                MangeMoi();
+                break;
+            case 2:
+                ClearScreen ();
+                //FaireMode
+                break;
+            case 3:
+                ClearScreen ();
+                //FaireMode
+                break;
+            default:
+                //FaireMode
+                break;
+        }
+    }
 }
 
 int main()
 {
-    ppal();
+    Menu();
     return 0;
 }
