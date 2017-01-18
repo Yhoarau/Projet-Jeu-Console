@@ -123,6 +123,56 @@ namespace
         Mat[Pos.first][Pos.second] = Player == KTokenPlayer1 ? KTokenPlayer1 : KTokenPlayer2;
     } //MoveToken
 
+    void Labyrinth(CMatrix & Mat)
+    {
+        Mat.resize(20);
+        for (CVLine & Line : Mat)
+            Line.resize(10);
+        CPosition Pos1 (0,3);
+        CPosition Pos2 (0,3);
+        CPosition PosI (0,3);
+        CPosition PosA (0,3);
+        srand (time(NULL));
+        unsigned LabType = 0; //rand()%4;
+        if (LabType == 0)
+        {
+            for (unsigned Line (0); Line < Mat.size(); ++Line)
+            {
+                for (unsigned i(0); i<Mat[Line].size(); ++i)
+                {
+                    Mat[Line][i] = KForbidden;
+                }
+            }
+           for (unsigned Line (0); Line <= 3; ++Line)
+               Mat[Line][3] = KEmpty;
+           for (unsigned Line (3); Line <= 6; ++Line)
+               Mat[Line][4] = KEmpty;
+           for (unsigned Line (6); Line <= 11; ++Line)
+               Mat[Line][3] = KEmpty;
+           for (unsigned Line (11); Line <= 13; ++Line)
+               Mat[Line][4] = KEmpty;
+           for (unsigned Line (13); Line <= 16; ++Line)
+               Mat[Line][5] = KEmpty;
+           for (unsigned Line (16); Line <= 18; ++Line)
+               Mat[Line][4] = KEmpty;
+           for (unsigned Column (4); Column <= 8; ++Column)
+               Mat[18][Column] = KEmpty;
+           for (unsigned Line (18); Line >= 8; --Line)
+               Mat[Line][8] = KEmpty;
+           for (unsigned Column (8); Column >= 1; --Column)
+               Mat[8][Column] = KEmpty;
+           for (unsigned Line (8); Line <= 12; ++Line)
+               Mat[Line][1] = KEmpty;
+           for (unsigned Line (12); Line <= 14; ++Line)
+               Mat[Line][0] = KEmpty;
+           for (unsigned Line (14); Line <= 16; ++Line)
+               Mat[Line][1] = KEmpty;
+           for (unsigned Line (16); Line <= 19; ++Line)
+               Mat[Line][2] = KEmpty;
+
+        }
+    }//Labyrinth
+
     int ppal ()
     {
 
