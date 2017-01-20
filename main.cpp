@@ -227,7 +227,7 @@ namespace
     bool MoveCheck(char & MoveKey)
     {
         for(unsigned i (0); i < PossibleKey.size()- 1; ++i)
-            if (PossibleKey[i] == MoveKey) return true;
+            if (PossibleKey[i] == tolower(MoveKey)) return true;
         return false;
     }
 
@@ -243,6 +243,7 @@ namespace
     {
         char Player = Mat[Pos.first][Pos.second];
         Mat[Pos.first][Pos.second] = KEmpty;
+
         switch(tolower(Move))
         {
             case 'a':
