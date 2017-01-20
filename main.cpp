@@ -95,8 +95,8 @@ namespace
     const char KTiret        = '-';
     const char KPipe         = '|';
     const char KForbidden    = 'G';
-    const char KCampPlayer1   = 'B';
-    const char KCampPlayer2   = 'C';
+    const char KCampPlayer1  = 'B';
+    const char KCampPlayer2  = 'C';
     const char KFoW          = 'F';
     const char KWatch        = 'W';
     const char KVictory      = 'V';
@@ -158,6 +158,7 @@ namespace
                     case KCampPlayer2 :
                         Couleur(KBleu);
                         Couleur(KFBleu);
+                        break;
                     case KFoW :
                         Couleur(KFNoir);
                         break;
@@ -546,7 +547,7 @@ namespace
 
     unsigned Difficulty()
     {
-        unsigned Choix;
+        char Choix;
         do
         {
          ClearScreen();
@@ -555,12 +556,27 @@ namespace
          cout << "1 - Facile" << endl;
          cout << "2 - Moyen" << endl;
          cout << "3 - Difficile" << "\n\n\n";
-         cout << "Votre choix : ";
-         cin >> Choix;
+         cout << "Votre choix : " << endl;
 
-        }
-         while (Choix < 1 || Choix > 3);
-         return Choix;
+         cin >> Choix;
+         read (STDIN_FILENO, &Choix, 1);
+
+         switch(Choix)
+         {
+         case '1' :
+             return 1;
+             break;
+         case '2' :
+             return 2;
+             break;
+         case '3' :
+             return 3;
+             break;
+         default :
+             break;
+         }
+        }while (Choix != '1'&& Choix != '2' && Choix != '3');
+
     } // Difficulty
 
 
@@ -579,7 +595,7 @@ namespace
         CPosition PosA (MatSizeH -1,MatSizeL -1);
         unsigned NbTurn(1);
         unsigned Sec(10);
-        unsigned Diff(Difficulty() - 1);
+        unsigned Diff(Difficulty() - 1 );
 
         char MoveKey('s');
         bool AllowedMove(true); // Défini si le mouvement que tente de faire le joueur est valide
@@ -604,7 +620,7 @@ namespace
 
                 sleep(1);
 
-                boost::thread ThInput {boost::bind(Input, boost::ref(MoveKey))};   // Lancement du thread qui récupère les input des utilisateurs
+                boost::thread ThInput2 {boost::bind(Input, boost::ref(MoveKey))};   // Lancement du thread qui récupère les input des utilisateurs
 
                 TurnPass = CptTurn(NbTurn, Sec, MoveKey);
 
@@ -636,7 +652,6 @@ namespace
 
         cout << "Partie terminee" << endl
              << "Vous serez redirigé dans le Menu dans " << Sec <<  " secondes." << endl;
-        cout << endl;
         for(; Sec > 0; Sec--)
         {
             cout << endl << Sec << " ";
@@ -730,7 +745,7 @@ namespace
             Line.resize(10);
 
         srand (time(NULL));
-        unsigned LabType = 2; //rand()%4;
+        unsigned LabType = 1; //rand()%4;
         if (LabType == 0)
         {
 
@@ -971,14 +986,18 @@ namespace
                                 (PossibleMove[NbKey(MoveKey)]).second);             // Le déplacement horizontal (.second) du mouvement (PossibleMove) selon la touche choisie (MoveKey)
 
                     AllowedMove = IsAllowed(Mat, NextPos);
-                    MoveToken(Mat, MoveKey, NbTurn%2 == 0 ? Pos2 : Pos1);
-                    FogOfWar(Mat, NbTurn%2 == 0 ? Pos1 : Pos2);
-                    SetCasesLab(Mat, Victory, Watch);
-                    UnFog(Mat, Watch);
                     GameOver = WinTestLab(AllowedMove, Pos1, Pos2, Victory, NbTurn);
+                    if(!(GameOver))
+                    {
+                        MoveToken(Mat, MoveKey, NbTurn%2 == 0 ? Pos2 : Pos1);
+                        FogOfWar(Mat, NbTurn%2 == 0 ? Pos1 : Pos2);
+                        SetCasesLab(Mat, Victory, Watch);
+                        UnFog(Mat, Watch);
+                        GameOver = WinTestLab(AllowedMove, Pos1, Pos2, Victory, NbTurn);
+                    }
 
                 }
-        reset_input_mode();
+        //reset_input_mode();
         Sec = 10;
 
         cout << "Partie terminee" << endl
@@ -986,7 +1005,7 @@ namespace
         cout << endl;
         for(; Sec > 0; Sec--)
         {
-            cout << endl << Sec << " ";
+            cout << Sec << " ";
             sleep(1);
         }
         Menu();
@@ -1003,7 +1022,9 @@ namespace
 
     void Menu()
     {
-        unsigned Choix;
+        set_input_mode();
+        char Choix(0);
+
         do
         {
         ClearScreen();
@@ -1011,24 +1032,27 @@ namespace
             cout << "-----------------MENU-----------------" << "\n\n\n";
             cout << "1 - Mode \" Mange moi ! \"" << endl;
             cout << "2 - Mode Labyrinthe" << "\n\n\n";
-            cout << "Votre choix : ";
+            cout << "Votre choix : "  << endl;
+
             cin >> Choix;
+            read (STDIN_FILENO, &Choix, 1);
+
+
             switch(Choix)
             {
-                case 1:
+                case '1':
                     ClearScreen ();
                     MangeMoi();
                     break;
-                case 2:
+                case '2':
                     ClearScreen ();
-                    cout << "coucou";
                     Labyrinthe();
                     break;
                 default:
                     //FaireMode
                     break;
             }
-        }while(Choix <1 || Choix > 2);
+        }while(Choix  != '1' && Choix  != '2');
     }
 
 }
